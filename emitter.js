@@ -4,13 +4,15 @@
  * Сделано задание на звездочку
  * Реализованы методы several и through
  */
-const isStar = true;
+const isStar = false;
 
 /**
  * Возвращает новый emitter
  * @returns {Object}
  */
 function getEmitter() {
+    let events = new Map();
+
     return {
 
         /**
@@ -18,26 +20,56 @@ function getEmitter() {
          * @param {String} event
          * @param {Object} context
          * @param {Function} handler
+         * @returns {Object}
          */
         on: function (event, context, handler) {
-            console.info(event, context, handler);
+            if (!events[event]) {
+                events[event] = [];
+            }
+            events[event].push({ context, handler });
+
+            return this;
         },
 
         /**
          * Отписаться от события
          * @param {String} event
          * @param {Object} context
+         * @returns {Object}
          */
         off: function (event, context) {
-            console.info(event, context);
+            Object.keys(events).forEach(k => {
+                if (k.startsWith(`${event}`)) {
+                    let res = [];
+                    events[k].forEach(x => {
+                        if (x.context !== context) {
+                            res.push(x);
+                        }
+                    });
+                    events[k] = res;
+                }
+            });
+
+            return this;
         },
 
         /**
          * Уведомить о событии
          * @param {String} event
+         * @returns {Object}
          */
         emit: function (event) {
-            console.info(event);
+            if (events[event]) {
+                events[event].forEach(el => {
+                    el.handler.apply(el.context);
+                });
+            }
+
+            if (event.includes('.')) {
+                this.emit(event.substring(0, event.lastIndexOf('.')));
+            }
+
+            return this;
         },
 
         /**
