@@ -39,7 +39,7 @@ function getEmitter() {
          */
         off: function (event, context) {
             Object.keys(events).forEach(k => {
-                if (k.startsWith(`${event}`)) {
+                if (k === event || k.startsWith(`${event}.`)) {
                     let res = [];
                     events[k].forEach(x => {
                         if (x.context !== context) {
