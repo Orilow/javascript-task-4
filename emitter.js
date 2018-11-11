@@ -17,56 +17,50 @@ function getEmitter() {
 
         /**
          * Подписаться на событие
-         * @param {String} event
+         * @param {String} eventName
          * @param {Object} context
          * @param {Function} handler
          * @returns {Object}
          */
-        on: function (event, context, handler) {
-            if (!events[event]) {
-                events[event] = [];
+        on: function (eventName, context, handler) {
+            if (!events.hasOwnProperty(eventName)) {
+                events[eventName] = [];
             }
-            events[event].push({ context, handler });
+            events[eventName].push({ context, handler });
 
             return this;
         },
 
         /**
          * Отписаться от события
-         * @param {String} event
+         * @param {String} eventName
          * @param {Object} context
          * @returns {Object}
          */
-        off: function (event, context) {
-            Object.keys(events).forEach(k => {
-                if (k === event || k.startsWith(`${event}.`)) {
-                    let res = [];
-                    events[k].forEach(x => {
-                        if (x.context !== context) {
-                            res.push(x);
-                        }
-                    });
-                    events[k] = res;
-                }
-            });
+        off: function (eventName, context) {
+            Object
+                .keys(events)
+                .forEach(key => {
+                    if (key === eventName || key.startsWith(`${eventName}.`)) {
+                        events[key] = events[key].filter(event => event.context !== context);
+                    }
+                });
 
             return this;
         },
 
         /**
          * Уведомить о событии
-         * @param {String} event
+         * @param {String} eventName
          * @returns {Object}
          */
-        emit: function (event) {
-            if (events[event]) {
-                events[event].forEach(el => {
-                    el.handler.apply(el.context);
-                });
+        emit: function (eventName) {
+            if (events[eventName]) {
+                events[eventName].forEach(event => event.handler.apply(event.context));
             }
 
-            if (event.includes('.')) {
-                this.emit(event.substring(0, event.lastIndexOf('.')));
+            if (eventName.includes('.')) {
+                this.emit(eventName.substring(0, eventName.lastIndexOf('.')));
             }
 
             return this;
